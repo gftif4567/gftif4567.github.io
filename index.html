@@ -2,191 +2,75 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>三角洲专属灵敏度生成器</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent}
-body{background:#0b0f17;color:#e8edf7;min-height:100vh;overflow:hidden}
-:root{--primary:#2596ff;--accent:#ff4757;--dark:#141a26;--card:#1b2332;--text:#d0d8e8}
-.page{display:none;padding:16px;height:100vh;flex-direction:column}
-.page.active{display:flex}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+:root{--primary:#2596ff;--accent:#ffb020;--bg:#0b0f17;--card:#161c28;--text:#e8edf2;--gray:#a0a8b8}
+body{background:#0b0f17;color:#e8edf2;padding:16px;min-height:100vh}
+.page{display:none;padding:16px;height:100%}
+.page.active{display:flex;flex-direction:column;gap:14px}
 h1{font-size:22px;margin-bottom:12px;color:#fff;text-align:center}
-h2{font-size:18px;margin-bottom:8px}
-.desc{color:#a0a8b8;font-size:14px;text-align:center;margin-bottom:16px;line-height:1.5}
-.btn{background:var(--primary);border:none;color:#fff;padding:14px 20px;border-radius:10px;font-size:16px;margin:6px;cursor:pointer;font-weight:bold}
-.btn.secondary{background:#2c384e}
-.btn.danger{background:var(--accent)}
-.test-area{flex:1;background:#111722;border-radius:12px;position:relative;overflow:hidden;margin:10px 0;touch-action:none}
-.target{position:absolute;border-radius:50%;background:var(--primary);transform:translate(-50%,-50%);touch-action:none}
-.target-small{width:24px;height:24px;background:#42b983}
-.target-track{width:28px;height:28px;background:#ffaa22}
-.target-reaction{width:32px;height:32px;background:#ff4757}
-#resultBox{background:var(--card);padding:16px;border-radius:12px;margin:10px 0}
-.score-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #2c384e}
-.copyTxt{width:100%;background:#0b0f17;color:#e8edf7;padding:12px;border-radius:8px;border:1px solid #2c384e;margin:10px 0;white-space:pre-wrap}
-.tip{font-size:13px;color:#a0a8b8;margin-top:8px}
-.countdown{font-size:48px;font-weight:bold;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;z-index:10}
+h2{font-size:18px;margin-bottom:8px;color:var(--primary)}
+.desc{color:#a0a8b8;font-size:14px;text-align:center}
+.card{background:var(--card);border-radius:14px;padding:16px}
+.item{margin:10px 0}
+label{display:block;margin-bottom:4px;font-size:15px}
+input{width:100%;padding:10px;border-radius:8px;border:none;background:#222a38;color:#fff;font-size:16px}
+.btn{width:100%;padding:12px;border-radius:10px;border:none;font-size:16px;font-weight:bold;cursor:pointer;margin-top:8px}
+.btn-blue{background:var(--primary);color:#fff}
+.btn-yellow{background:var(--accent);color:#000}
+.result-box{background:#222a38;padding:14px;border-radius:10px;margin-top:10px;white-space:pre-line}
 </style>
 </head>
 <body>
-<!-- 首页 -->
-<div class="page active" id="pageHome">
-<h1>三角洲灵敏度生成器</h1>
-<p class="desc">5项触屏实测，自动加权算出专属灵敏度<br>权重：跟枪30%｜精准25%｜反应20%｜拉枪15%｜滑动习惯10%</p>
-<div style="margin:auto 0;text-align:center">
-<button class="btn" onclick="startAll()">开始全套测试</button>
-<button class="btn secondary" onclick="resetAll()">重置全部</button>
+<div id="page1" class="page active">
+<h1>三角洲行动｜4指猛攻灵敏度</h1>
+<p class="desc">填入你的手感，生成专属灵敏度</p>
+<div class="card">
+<div class="item">
+<label>全局灵敏度</label>
+<input type="number" id="global" value="72">
+</div>
+<div class="item">
+<label>开镜灵敏度</label>
+<input type="number" id="ads" value="65">
+</div>
+<div class="item">
+<label>陀螺仪全局</label>
+<input type="number" id="gyroAll" value="2.2" step="0.1">
+</div>
+<div class="item">
+<label>陀螺仪开镜</label>
+<input type="number" id="gyroAds" value="1.8" step="0.1">
 </div>
 </div>
-
-<!-- 测试1：跟枪追踪 15s -->
-<div class="page" id="pageTrack">
-<h2>① 跟枪追踪测试（15秒）</h2>
-<p class="desc">拖动准星跟随黄色目标移动，偏差越小分数越高</p>
-<div class="test-area" id="trackArea">
-<div class="countdown" id="trackCd">准备</div>
-<div class="target target-track" id="trackTarget"></div>
-</div>
-<div style="display:flex;gap:8px">
-<button class="btn secondary" onclick="reTest(1)">重测</button>
-<button class="btn" onclick="nextTest()">下一项</button>
+<button class="btn btn-blue" onclick="gen()">生成灵敏度</button>
+<div class="card">
+<h2>生成结果</h2>
+<div class="result-box" id="res"></div>
+<button class="btn btn-yellow" onclick="copyText()">一键复制</button>
 </div>
 </div>
-
-<!-- 测试2：精准点击 -->
-<div class="page" id="pageClick">
-<h2>② 精准点击测试（15个目标）</h2>
-<p class="desc">点击绿色小圆点，空点会扣分</p>
-<div class="test-area" id="clickArea">
-<div class="countdown" id="clickCd">准备</div>
-</div>
-<div style="display:flex;gap:8px">
-<button class="btn secondary" onclick="reTest(2)">重测</button>
-<button class="btn" onclick="nextTest()">下一项</button>
-</div>
-</div>
-
-<!-- 测试3：反应速度 -->
-<div class="page" id="pageReact">
-<h2>③ 反应速度测试（8次）</h2>
-<p class="desc">红点出现立刻点击，越快得分越高</p>
-<div class="test-area" id="reactArea">
-<div class="countdown" id="reactCd">准备</div>
-</div>
-<div style="display:flex;gap:8px">
-<button class="btn secondary" onclick="reTest(3)">重测</button>
-<button class="btn" onclick="nextTest()">下一项</button>
-</div>
-</div>
-
-<!-- 测试4：拉枪转向 -->
-<div class="page" id="pageFlick">
-<h2>④ 拉枪转向测试（6次远距离拉枪）</h2>
-<p class="desc">快速滑动屏幕，把准星拉到目标上点击</p>
-<div class="test-area" id="flickArea">
-<div class="countdown" id="flickCd">准备</div>
-</div>
-<div style="display:flex;gap:8px">
-<button class="btn secondary" onclick="reTest(4)">重测</button>
-<button class="btn" onclick="nextTest()">下一项</button>
-</div>
-</div>
-
-<!-- 测试5：滑动习惯 -->
-<div class="page" id="pageSlide">
-<h2>⑤ 滑动习惯测试（横向滑动3次）</h2>
-<p class="desc">在区域内横向左右滑动3次，采集手指滑动距离</p>
-<div class="test-area" id="slideArea">
-<div class="countdown" id="slideCd">准备</div>
-</div>
-<div style="display:flex;gap:8px">
-<button class="btn secondary" onclick="reTest(5)">重测</button>
-<button class="btn" onclick="calcResult()">查看灵敏度结果</button>
-</div>
-</div>
-
-<!-- 结果页 -->
-<div class="page" id="pageResult">
-<h1>✅ 你的专属灵敏度</h1>
-<div id="resultBox"></div>
-<textarea class="copyTxt" id="copyText" readonly></textarea>
-<button class="btn" onclick="copyResult()">一键复制</button>
-<button class="btn danger" onclick="resetAll()">全部重置</button>
-<p class="tip">提示：进入三角洲行动，把下面参数填入游戏灵敏度，可根据手感小幅微调</p>
-</div>
-
 <script>
-// 全局数据
-const state = {
-    scores: [null,null,null,null,null], // 0跟枪,1精准,2反应,3拉枪,4滑动习惯
-    currentTest:0,
-    track:{start:false,time:15,devSum:0,count:0},
-    click:{remain:15,miss:0,hit:0},
-    react:{times:[],count:0},
-    flick:{scoreSum:0,count:0},
-    slide:{distList:[],count:0}
+function gen(){
+let g=document.getElementById('global').value;
+let a=document.getElementById('ads').value;
+let ga=document.getElementById('gyroAll').value;
+let gad=document.getElementById('gyroAds').value;
+let str=`【三角洲行动 4指猛攻】
+全局灵敏度：${g}
+开镜灵敏度：${a}
+陀螺仪全局：${ga}
+陀螺仪开镜：${gad}
+小提示：靶场微调，快就降低数值，慢就提高`;
+document.getElementById('res').innerText=str;
 }
-const weights = [0.30,0.25,0.20,0.15,0.10];
-
-// 页面切换
-function showPage(id){
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
-    document.getElementById(id).classList.add('active')
+function copyText(){
+let txt=document.getElementById('res').innerText;
+navigator.clipboard.writeText(txt).then(()=>alert("复制成功！"))
 }
-function startAll(){
-    state.currentTest=0;
-    runTest(1);
-}
-function runTest(idx){
-    state.currentTest=idx;
-    switch(idx){
-        case1:showPage('pageTrack');startTrackTest();break;
-        case2:showPage('pageClick');startClickTest();break;
-        case3:showPage('pageReact');startReactTest();break;
-        case4:showPage('pageFlick');startFlickTest();break;
-        case5:showPage('pageSlide');startSlideTest();break;
-    }
-}
-function nextTest(){
-    if(state.currentTest<5) runTest(state.currentTest+1)
-}
-function reTest(idx){
-    state.scores[idx-1]=null;
-    runTest(idx);
-}
-function resetAll(){
-    state.scores=[null,null,null,null,null];
-    state.currentTest=0;
-    state.track={start:false,time:15,devSum:0,count:0};
-    state.click={remain:15,miss:0,hit:0};
-    state.react={times:[],count:0};
-    state.flick={scoreSum:0,count:0};
-    state.slide={distList:[],count:0};
-    showPage('pageHome')
-}
-
-// 1.跟枪追踪测试
-function startTrackTest(){
-    const area=document.getElementById('trackArea');
-    const target=document.getElementById('trackTarget');
-    const cd=document.getElementById('trackCd');
-    cd.innerText="3";
-    setTimeout(()=>cd.innerText="2",1000)
-    setTimeout(()=>cd.innerText="1",2000)
-    setTimeout(()=>{
-        cd.innerText="";
-        state.track.start=true;
-        let t=0;
-        let targetX=area.clientWidth/2,targetY=area.clientHeight/2;
-        let userX=targetX,userY=targetY;
-        function animate(){
-            if(!state.track.start) return;
-            t+=0.02;
-            //不规则目标移动
-            targetX=area.clientWidth*0.2 + Math.sin(t*1.2)*area.clientWidth*0.35;
-            targetY=area.clientHeight*0.2 + Math.cos(t*0.8)*area.clientHeight*0.35;
-            target.style.left=targetX+"px";
-            target.style.top=targetY+"px";
-            //偏差计算
-            const dev=Math.hypot(userX-targetX,userY-targetY);
-            state.track.devSum+=dev;state.track.count++
+</script>
+</body>
+</html>
